@@ -1,0 +1,39 @@
+version: '3.9'
+services:
+  db:
+    image: mysql:8.0.29
+    command: mysqld --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      TZ: America/Sao_Paulo
+      MYSQL_ROOT_PASSWORD: 070191
+      MYSQL_USER: docker
+      MYSQL_DATABASE: rest_spring
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_TCP_PORT: 3308
+    ports:
+      - 3308:3308
+    expose:
+      - 3308
+    networks:
+      - acgm-network
+  rest-spring:
+    image: acgm/rest-spring-boot-java
+    restart: always
+    build: ./rest-spring-boot-java
+    working_dir: /rest-spring-boot-java
+    environment:
+      TZ: America/Sao_Paulo
+      SPRING.DATASOURCE.URL: jdbc:mysql://db:3308/rest_spring?useTimezone=true&serverTimezone=UTC
+      SPRING.DATASOURCE.USERNAME: root
+      SPRING.DATASOURCE.PASSWORD: 070191
+    ports:
+      - 80:80
+    command: mvn spring-boot:run
+    depends_on:
+      - db
+    networks:
+      - acgm-network
+networks:
+  acgm-network:
+    driver: bridge
